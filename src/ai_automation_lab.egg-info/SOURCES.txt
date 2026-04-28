@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+src/ai_automation_lab/__init__.py
+src/ai_automation_lab/main.py
+src/ai_automation_lab.egg-info/PKG-INFO
+src/ai_automation_lab.egg-info/SOURCES.txt
+src/ai_automation_lab.egg-info/dependency_links.txt
+src/ai_automation_lab.egg-info/top_level.txt
+tests/test_main.py
