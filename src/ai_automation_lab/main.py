@@ -91,7 +91,7 @@ def main() -> None:
     save_json(summary, output_path)
 
     print(f"Saved summary to {output_path}")
-    print(summary)
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
