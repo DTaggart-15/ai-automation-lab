@@ -1,8 +1,6 @@
-@'
-.venv/
+﻿.venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .env
 data/output/
-'@ | Set-Content -Encoding UTF8 ".gitignore"
