@@ -21,6 +21,7 @@ class TestLeadSummary(unittest.TestCase):
     def test_load_leads(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             input_path = Path(temp_dir) / "leads.csv"
+
             input_path.write_text(
                 "lead_id,name,budget_usd\n"
                 "1,Anna,1000\n"
