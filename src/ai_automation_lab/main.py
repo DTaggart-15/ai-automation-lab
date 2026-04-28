@@ -1,11 +1,10 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import csv
 import json
 import logging
 from pathlib import Path
-
 
 logger = logging.getLogger(__name__)
 
@@ -60,65 +59,22 @@ def save_json(data: dict[str, int], output_path: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Build a simple summary from a leads CSV file."
-    )
-
-    parser.add_argument(
-        "--input",
-        type=Path,
-        default=Path("data/sample/leads.csv"),
-        help="Path to input CSV file.",
-    )
-
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("data/output/summary.json"),
-        help="Path to output JSON file.",
-    )
-
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging level.",
-    )
-
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-
-    logging.basicConfig(
-        level=args.log_level,
-        format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-    )
-
-    leads = load_leads(args.input)
-    summary = build_summary(leads)
-    save_json(summary, args.output)
-
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-
-
-if __name__ == "__main__":
-    main()
-def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build lead summary from CSV file.")
+
     parser.add_argument(
         "--input",
         type=str,
         default="data/sample/leads.csv",
         help="Path to input CSV file.",
     )
+
     parser.add_argument(
         "--output",
         type=str,
         default="data/output/summary.json",
         help="Path to output JSON file.",
     )
+
     return parser.parse_args()
 
 
