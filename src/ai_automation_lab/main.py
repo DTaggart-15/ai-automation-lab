@@ -105,3 +105,38 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build lead summary from CSV file.")
+    parser.add_argument(
+        "--input",
+        type=str,
+        default="data/sample/leads.csv",
+        help="Path to input CSV file.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="data/output/summary.json",
+        help="Path to output JSON file.",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    args = parse_args()
+
+    input_path = Path(args.input)
+    output_path = Path(args.output)
+
+    leads = load_leads(input_path)
+    summary = build_summary(leads)
+    save_json(summary, output_path)
+
+    print(f"Saved summary to {output_path}")
+    print(summary)
+
+
+if __name__ == "__main__":
+    main()
