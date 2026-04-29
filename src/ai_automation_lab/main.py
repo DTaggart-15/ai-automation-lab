@@ -55,8 +55,6 @@ def save_json(data: dict[str, int], output_path: Path) -> None:
         encoding="utf-8",
     )
 
-    logger.info("Saved summary to %s", output_path)
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build lead summary from CSV file.")
@@ -79,8 +77,6 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
     args = parse_args()
 
     input_path = Path(args.input)
@@ -90,7 +86,6 @@ def main() -> None:
     summary = build_summary(leads)
     save_json(summary, output_path)
 
-    print(f"Saved summary to {output_path}")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
