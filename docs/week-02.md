@@ -1,152 +1,91 @@
-\# Week 02 — Safe Data Cleaner
-
-
-
-\## Goal
-
-
-
-The goal of Week 02 was to build a safe CSV data cleaner for basic automation workflows.
-
-
-
-The tool reads a dirty CSV file, cleans column names and text values, removes fully empty rows, masks sensitive fields, and saves a cleaned CSV file together with a JSON report.
-
-
-
-\## What I practiced
-
-
-
-During this week I practiced:
-
-
-
-\- creating a new Python module;
-
-\- writing tests before final implementation;
-
-\- cleaning CSV data;
-
-\- normalizing column names;
-
-\- cleaning text values;
-
-\- removing empty rows;
-
-\- masking sensitive data;
-
-\- saving cleaned CSV files;
-
-\- saving JSON reports;
-
-\- running a Python module from PowerShell;
-
-\- checking project status with Git.
-
-
-
-\## Files created
-
-
-
-Main module:
-
-
-
-```text
-
-src/ai\_automation\_lab/week02\_safe\_cleaner.py
-
-Tests:
-
-
-
-tests/test\_week02\_safe\_cleaner.py
-
-
-
-Sample input:
-
-
-
-data/sample/week02\_dirty\_leads.csv
-
-
-
-Generated output:
-
-
-
-data/output/week02/clean\_leads.csv
-
-data/output/week02/clean\_report.json
-
-What the cleaner does
-
-
-
-The cleaner performs the following operations:
-
-
-
-Normalizes column names.
-
-
-
-Example:
-
-
-
-Full Name -> full\_name
-
-Email Address -> email\_address
-
-Phone-Number -> phone\_number
-
-Budget USD -> budget\_usd
-
-Cleans text values.
-
-
-
-Example:
-
-
-
-"  Anna   Petrova  " -> "Anna Petrova"
-
-Removes fully empty rows.
-
-
-
-Rows where all values are empty are not written to the cleaned output file.
-
-
-
-Masks email addresses.
-
-
-
-Example:
-
-
-
-anna@example.com -> a\*\*\*@example.com
-
-x@test.com -> \*\*\*@test.com
-
-Masks phone numbers.
-
-
-
-Example:
-
-
-
-+7 999 123-45-67 -> +7\*\*\*\*\*\*\*\*67
-
-89991234567 -> 8\*\*\*\*\*\*\*\*67
-
-Saves a JSON report.
-
+# Week 02 — Safe Local Data Cleaner
+
+## Goal
+
+Build a local Python CLI that reads synthetic CSV data, validates rows, writes safe CSV/JSON outputs, and avoids storing direct contact data in outputs and logs.
+
+## What I practiced
+
+- pathlib
+- csv.DictReader / DictWriter
+- json output
+- argparse CLI
+- logging
+- regex validation
+- Decimal for money
+- unittest
+- PowerShell file operations
+
+## Safety rules
+
+- synthetic data only
+- example domains only
+- no real customer data
+- no secrets in repo
+- no raw row dumps in logs
+- cleaned outputs exclude contact_email
+
+## Produced files
+
+- data/output/week02/cleaned_leads.csv
+- data/output/week02/cleaned_leads.json
+- data/output/week02/errors.json
+- data/output/week02/summary.json
+- logs/week02.log
+
+## Input file
+
+- data/sample/leads_week02.csv
+
+## Main module
+
+- src/ai_automation_lab/week02_safe_cleaner.py
+
+## Tests
+
+- tests/test_week02_safe_cleaner.py
+
+## CLI command
+
+```powershell
+.\.venv\Scripts\python.exe -m ai_automation_lab.week02_safe_cleaner --input .\data\sample\leads_week02.csv --output-dir .\data\output\week02 --log-file .\logs\week02.log
+```
+
+## Expected summary
+
+```json
+{
+  "total_rows": 6,
+  "valid_rows": 3,
+  "invalid_rows": 3,
+  "total_valid_budget_usd": "25200.50",
+  "services": {
+    "invoice_automation": 1,
+    "support_triage": 1,
+    "document_extraction": 1
+  },
+  "countries": {
+    "GB": 1,
+    "DE": 1,
+    "NL": 1
+  },
+  "priorities": {
+    "normal": 2,
+    "high": 1
+  }
+}
+```
+
+## Questions to review
+
+1. Why use Decimal instead of float for money?
+2. Why open CSV files with newline=''?
+3. Why use pathlib instead of hardcoded path strings?
+4. Why validate email but exclude it from safe output?
+5. What should never be written to logs?
+6. What does argparse give us?
+7. What do unit tests protect against?
+
+## Result
+
+Week 02 now contains a safe local data cleaner with validation, sanitized outputs, structured JSON reports, and logging.

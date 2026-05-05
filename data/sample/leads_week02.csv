@@ -1,0 +1,7 @@
+lead_ref,contact_alias,contact_email,company_alias,requested_service,budget_usd,requested_due_date,country_code
+LD-0001,contact_001,contact_001@example.com,org_alpha,invoice_automation,5000.00,2026-05-15,GB
+LD-0002,contact_002,contact_002@example.org,org_beta,support_triage,8200.50,2026-05-20,DE
+LD-0003,contact_003,contact_003@example.com,org_gamma,knowledge_base_rag,0,2026-05-25,FR
+LD-0004,contact_004,contact_004@example.net,org_delta,lead_scoring,1500.00,2026-05-28,US
+LD-0005,contact_005,contact_005@example.com,org_epsilon,document_extraction,12000.00,2026/05/29,NL
+LD-0006,contact_006,contact_006@example.org,org_zeta,document_extraction,12000.00,2026-06-03,NL
