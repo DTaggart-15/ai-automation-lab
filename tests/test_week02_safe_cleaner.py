@@ -1,65 +1,99 @@
-import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from ai_automation_lab.week02_safe_cleaner import (
-    clean_column_name,
-    clean_text,
-    mask_email,
-    mask_phone,
-    clean_csv,
+    build_summary,
+    clean_row,
+    load_rows,
+    process_rows,
+    write_csv,
+    write_json,
 )
 
 
 class TestWeek02SafeCleaner(unittest.TestCase):
-    def test_clean_column_name(self):
-        self.assertEqual(clean_column_name(" Full Name "), "full_name")
-        self.assertEqual(clean_column_name("Email Address"), "email_address")
-        self.assertEqual(clean_column_name("Phone-Number"), "phone_number")
+    def test_clean_row_returns_safe_record(self):
+        row = {
+            "lead_ref": "LD-0001",
+            "contact_alias": "contact_001",
+            "contact_email": "contact_001@example.com",
+            "company_alias": "org_alpha",
+            "requested_service": "invoice_automation",
+            "budget_usd": "5000.00",
+            "requested_due_date": "2026-05-15",
+            "country_code": "GB",
+        }
 
-    def test_clean_text(self):
-        self.assertEqual(clean_text("  Anna   Petrova  "), "Anna Petrova")
-        self.assertEqual(clean_text(""), "")
-        self.assertEqual(clean_text(None), "")
+        cleaned, error = clean_row(2, row)
 
-    def test_mask_email(self):
-        self.assertEqual(mask_email("anna@example.com"), "a***@example.com")
-        self.assertEqual(mask_email("x@test.com"), "***@test.com")
-        self.assertEqual(mask_email("not-email"), "not-email")
+        self.assertIsNone(error)
+        self.assertIsNotNone(cleaned)
+        self.assertEqual(cleaned["lead_ref"], "LD-0001")
+        self.assertEqual(cleaned["priority"], "normal")
+        self.assertNotIn("contact_email", cleaned)
 
-    def test_mask_phone(self):
-        self.assertEqual(mask_phone("+7 999 123-45-67"), "+7********67")
-        self.assertEqual(mask_phone("89991234567"), "8********67")
-        self.assertEqual(mask_phone("no phone"), "no phone")
+    def test_clean_row_rejects_non_demo_domain(self):
+        row = {
+            "lead_ref": "LD-0002",
+            "contact_alias": "contact_002",
+            "contact_email": "contact_002@example.net",
+            "company_alias": "org_beta",
+            "requested_service": "support_triage",
+            "budget_usd": "8200.50",
+            "requested_due_date": "2026-05-20",
+            "country_code": "DE",
+        }
 
-    def test_clean_csv(self):
+        cleaned, error = clean_row(3, row)
+
+        self.assertIsNone(cleaned)
+        self.assertIsNotNone(error)
+
+        fields = {item["field"] for item in error["errors"]}
+
+        self.assertIn("contact_email", fields)
+
+    def test_end_to_end_outputs(self):
+        csv_content = (
+            "lead_ref,contact_alias,contact_email,company_alias,requested_service,"
+            "budget_usd,requested_due_date,country_code\n"
+            "LD-0001,contact_001,contact_001@example.com,org_alpha,invoice_automation,"
+            "5000.00,2026-05-15,GB\n"
+            "LD-0002,contact_002,contact_002@example.net,org_beta,support_triage,"
+            "8200.50,2026-05-20,DE\n"
+        )
+
         with tempfile.TemporaryDirectory() as temp_dir:
-            input_path = Path(temp_dir) / "dirty.csv"
-            output_path = Path(temp_dir) / "clean.csv"
+            temp_path = Path(temp_dir)
+            input_path = temp_path / "leads.csv"
+            output_dir = temp_path / "out"
 
-            input_path.write_text(
-                " Full Name , Email Address , Phone-Number , Budget USD \n"
-                "  Anna   Petrova  , anna@example.com , +7 999 123-45-67 , 1000 \n"
-                " , , , \n"
-                " Ivan Ivanov , ivan@test.com , 89991234567 , 2000 \n",
-                encoding="utf-8",
+            input_path.write_text(csv_content, encoding="utf-8")
+
+            rows = load_rows(input_path)
+            cleaned_rows, error_rows = process_rows(rows)
+            summary = build_summary(cleaned_rows, error_rows, len(rows))
+
+            write_csv(cleaned_rows, output_dir / "cleaned_leads.csv")
+            write_json(cleaned_rows, output_dir / "cleaned_leads.json")
+            write_json(error_rows, output_dir / "errors.json")
+            write_json(summary, output_dir / "summary.json")
+
+            self.assertTrue((output_dir / "cleaned_leads.csv").exists())
+            self.assertTrue((output_dir / "cleaned_leads.json").exists())
+            self.assertTrue((output_dir / "errors.json").exists())
+            self.assertTrue((output_dir / "summary.json").exists())
+
+            loaded_summary = json.loads(
+                (output_dir / "summary.json").read_text(encoding="utf-8")
             )
 
-            report = clean_csv(input_path, output_path)
-
-            self.assertTrue(output_path.exists())
-            self.assertEqual(report["input_rows"], 3)
-            self.assertEqual(report["output_rows"], 2)
-            self.assertEqual(report["masked_emails"], 2)
-            self.assertEqual(report["masked_phones"], 2)
-
-            with output_path.open("r", encoding="utf-8", newline="") as file:
-                rows = list(csv.DictReader(file))
-
-            self.assertEqual(rows[0]["full_name"], "Anna Petrova")
-            self.assertEqual(rows[0]["email_address"], "a***@example.com")
-            self.assertEqual(rows[0]["phone_number"], "+7********67")
+            self.assertEqual(loaded_summary["total_rows"], 2)
+            self.assertEqual(loaded_summary["valid_rows"], 1)
+            self.assertEqual(loaded_summary["invalid_rows"], 1)
+            self.assertEqual(loaded_summary["total_valid_budget_usd"], "5000.00")
 
 
 if __name__ == "__main__":
